@@ -15,7 +15,7 @@ class ModulinoColor:
 
   They can be accessed e.g. as ModulinoColor.RED
   """
-  
+
   def __init__(self, r: int, g: int, b: int):
     """
     Initializes the color with the given RGB values.
@@ -35,7 +35,7 @@ class ModulinoColor:
     self.r = r
     self.g = g
     self.b = b
-  
+
   def __int__(self) -> int:
     """Return the 32-bit integer representation of the color."""
     return (self.b << 8 | self.g << 16 | self.r << 24)
@@ -70,10 +70,10 @@ class ModulinoPixels(Modulino):
 
   def _map(self, x: float | int, in_min: float | int, in_max: float | int, out_min: float | int, out_max: float | int) -> float | int:
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-  
+
   def _mapi(self, x: float | int, in_min: float | int, in_max: float | int, out_min: float | int, out_max: float | int) -> int:
-    return int(self._map(x, in_min, in_max, out_min, out_max)) 
-  
+    return int(self._map(x, in_min, in_max, out_min, out_max))
+
   def set_range_rgb(self, index_from: int, index_to: int, r: int, g: int, b: int, brightness: int = 100) -> None:
     """
     Sets the color of the LEDs in the given range to the given RGB values.
@@ -172,7 +172,7 @@ class ModulinoPixels(Modulino):
     """
     for i in range(start, end):
         self.clear(i)
-        
+
   def clear_all(self) -> None:
     """
     Turns all the LEDs off.
@@ -185,3 +185,61 @@ class ModulinoPixels(Modulino):
     Otherwise, the changes will not be visible.
     """
     self.write(self.data)
+
+
+class VirtualModulinoPixels:
+
+    leds = []
+
+    def __init__(self):
+        self.leds = [VirtualLed() for _ in range(NUM_LEDS)]
+
+    def set_rgb(self, idx: int, r: int, g: int, b: int, brightness: int = 100) -> None:
+        self.leds[idx].setColor(r, g, b)
+        self.leds[idx].setBrightness(brightness)
+
+    def set_all_rgb(self, r: int, g: int, b: int, brightness: int = 100) -> None:
+        for led in self.leds:
+            led.setColor(r,g,b)
+            led.setBrightness(brightness)
+
+    def clear_all(self):
+        [l.clear() for l in self.leds]
+
+    def show(self):
+        print("##########")
+        print("#        #")
+        print("#", end="")
+        for led in self.leds:
+            print(led, end="")
+        print("#")
+        print("#        #")
+        print("##########")
+
+class VirtualLed:
+
+    def __init__(self, r:int=0, g:int=0, b:int=0, brightness:int=100):
+        self.color = ModulinoColor(r,g,b)
+        self.brightness = brightness
+
+    def setBrightness(self, brightness:int):
+        if brightness < 0 or brightness > 100:
+            raise ValueError(f"Brightness value {brightness} should be between 0 and 100")
+        self.brightness = brightness
+
+    def setColor(self, r:int, g:int, b:int):
+        self.color.g = r
+        self.color.g = g
+        self.color.b = b
+
+    def clear(self):
+        self.color.g = 0
+        self.color.g = 0
+        self.color.b = 0
+        self.brightness = 100;
+
+    def __str__(self):
+        i = int(self.color)
+        if i == 0:
+            return " "
+        return "X"
